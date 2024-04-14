@@ -246,4 +246,3 @@ class Pixel_Pusher():
         self.bit_flipper_sm = rp2.StateMachine(2, pio_code.bit_flipper_pio, freq=250_000_000)
         self.bit_flipper_sm.restart()  ## flush buffers?  belt and suspenders.
         self.bit_flipper_sm.active(1)
-

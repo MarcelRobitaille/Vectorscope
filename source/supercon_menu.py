@@ -22,9 +22,9 @@ def planets(arg):
 def menu_custom(the_menu):
     if the_menu.level==1:
         if machine.Pin(22).value():
-            the_menu.current[2]=[" Sound Off",toggle_sound,0]
+            the_menu.current[3]=[" Sound Off",toggle_sound,0]
         else:
-            the_menu.current[2]=[" Sound On",toggle_sound,1]
+            the_menu.current[3]=[" Sound On",toggle_sound,1]
 
 def toggle_sound(arg):
     ## toggle sound here
@@ -38,6 +38,11 @@ def run_lissajous(arg):
     vos_state.gc_suspend = True
     vectoros.launch_task('lissajous')  
     # we never come back, vectorscope
+    return EXIT
+
+def run_robot(arg):
+    vos_state.show_menu=False
+    vectoros.launch_task('run_robot')
     return EXIT
 
 def reboot(arg):
@@ -80,6 +85,7 @@ async def vos_main():
             submenu=[["  Planets", planets, 0],["  Sketch",runsketch,0],["  Back",m_exit,None]]
             mainmenu=[[" Lissajous", run_lissajous,None],
                       [" Demos", SUBMENU, submenu] ,
+                      [" Run Robot", run_robot, None] ,
                       [" Sound", toggle_sound, None],
                       [" Reboot",reboot,False],
                       ]
