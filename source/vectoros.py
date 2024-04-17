@@ -23,7 +23,7 @@ async def _sleeper():
 
     This function runs a loop that sleeps for 5 seconds and then collects garbage.
     """
-    
+
     while True:
         await asyncio.sleep_ms(gc_thread_rate)
         if vos_state.gc_suspend==False:
@@ -31,7 +31,7 @@ async def _sleeper():
 
 def reset():
     m_reset()
-    
+
 def soft_reset():
     m_soft_reset()
 
@@ -40,7 +40,7 @@ def sleep_forever():
     """
     Function to let non async function wait forever.
     """
-    
+
     asyncio.run(_sleeper())
 
 async def _delayer(n):
@@ -50,7 +50,7 @@ async def _delayer(n):
     Args:
         n (int): The number of milliseconds to delay.
     """
-    
+
     await asyncio.sleep_ms(n)
 
 def sleep(n):
@@ -63,14 +63,14 @@ def sleep(n):
     vos_debug.debug_print(vos_debug.DEBUG_LEVEL_WARNING,"sleep called which uses asyncio.run")
     asyncio.run(_delayer(n))
 
-def get_screen():
+def get_screen() -> screennorm.ScreenNorm:
     """
     Function to get the one screen object.
 
     Returns:
         ScreenNorm: The screen object.
     """
-    
+
     global _screen
     return _screen
 
@@ -78,7 +78,7 @@ async def launch_repl():
         """
         Asynchronous function to start a repl.
         """
-        
+
         vos_state.task_dict['$repl']=asyncio.create_task(aiorepl.task())
 
 async def launch(task_tag):
@@ -87,7 +87,7 @@ async def launch(task_tag):
 
     Args:
         task_tag (str): The tag of the program to launch.
-        
+
      Returns:
             Task: The created task.
      """
@@ -105,7 +105,7 @@ async def launch(task_tag):
     except TypeError:
         pass
 
-        
+
 
 def launch_task(task_tag):
      """
@@ -113,20 +113,20 @@ def launch_task(task_tag):
 
      Args:
          task_tag (str): The tag of the program to launch.
-         
+
       Returns:
             Task: The created task.
       """
      vos_state.task_dict[task_tag]=asyncio.create_task(launch(task_tag))
-     
-     
+
+
 async def launch_vecslot(slot):
     from vectorscope import Vectorscope
     _screen.clear()
     _screen.idle()
     gc.collect()
     vos_state.gc_suspend=True
-    vos_state.show_menu=False 
+    vos_state.show_menu=False
     vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,f"Launching slot {slot}:{vectorscope_slots[slot]}")
     mod=__import__(vectorscope_slots[slot])
     fn=getattr(mod,'slot_main')
@@ -142,17 +142,17 @@ async def launch_vecslot(slot):
         vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,"Slot done, reboot!")
 #        await asyncio.sleep(5)
         reset()
-    
-    
-def remove_task(t):   
+
+
+def remove_task(t):
      """
      Function to remove a task. Note that this does not stop the task, just takes it out of the list
 
      Args:
          t (str): The tag of the task to remove.
       """
-     
-     try:   
+
+     try:
          vos_state.task_dict.pop(t)
      except Exception:
          pass
@@ -184,14 +184,14 @@ def vectoros_active():
      Returns:
          bool: True if active, False otherwise.
       """
-     
+
      return vos_state.active
-    
+
 _vectoros_runafter=None
 
 def set_global_exception():
      """
-     Function to catch exceptions. 
+     Function to catch exceptions.
       """
      def handle_exception(loop,context):
          import sys
@@ -201,21 +201,21 @@ def set_global_exception():
              sys.print_exception(context["exception"])
          sys.exit()
 
-     
+
      loop=asyncio.get_event_loop()
      loop.set_exception_handler(handle_exception)
-     
+
 async def vectoros_startup(autolaunch=True):
     """
     Function to start services (called by main)
-    
+
     Args:
     autolaunch (bool): True to launch autostart programs (default)
     """
     global _VERSION
     vos_state.version=_VERSION
     vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,f"VectorOS {_VERSION} starting",RTC().datetime())
-# honor gc thread request    
+# honor gc thread request
     if gc_thread_rate!=0:
         gc.disable()
         vos_state.task_dict['$gc']=asyncio.create_task(_gc_thread(gc_thread_rate))
@@ -225,17 +225,17 @@ async def vectoros_startup(autolaunch=True):
 # spin up timer infrastructure
     if timer_base_rate!=0:
         vos_state.task_dict['$timer']=timer.Timer.run()
-# at this point, we consider ourselves running        
+# at this point, we consider ourselves running
     vos_state.active=True
 # launch repl if requested
     if autolaunch:
         if (auto_launch_repl):
             await launch_repl()
-# run auto launch stuff from vos_launch        
+# run auto launch stuff from vos_launch
         for t in auto_launch_list:
             vos_state.task_dict[t]=asyncio.create_task(launch(t))
         vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,"VectorOS started",RTC().datetime())
-            
+
 
 # shut down our service (but not apps)
 def vectoros_shutdown(deactivate=True):
@@ -260,7 +260,7 @@ def vectoros_shutdown(deactivate=True):
     asyncio.get_event_loop().set_exception_handler(None)
     gc.collect()
     vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,"VectorOS shut down",RTC().datetime())
-    
+
 def ext_run(cmd):
     """
     Function to exit VectorOS and run a program
@@ -283,8 +283,8 @@ async def main():
     set_global_exception()
     await vectoros_startup()
     await _sleeper()
-    
-# This is the main entry point that starts everything    
+
+# This is the main entry point that starts everything
 def run():
     """
     Function to run the main function.
@@ -315,7 +315,7 @@ def run():
 # requrires a small server on the main core
 #This mostly works in single core mode
         finally:
-            if vos_state._xthreading==0:      # single core mode 
+            if vos_state._xthreading==0:      # single core mode
                 if vos_state.run_after != None:					# as we exit, set up any pending command
                     cmd=vos_state.run_after
                     vos_state.run_after=None
@@ -357,10 +357,6 @@ def run():
     else:
         pass
 
+
 if __name__=="__main__":
     run()
-
-
-    
-    
-        

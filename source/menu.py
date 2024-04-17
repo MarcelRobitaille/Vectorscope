@@ -10,7 +10,7 @@ from vos_state import vos_state
 
 
 
-screen=vectoros.get_screen()
+screen = vectoros.get_screen()
 
 BACK=-1
 EXIT=1
@@ -20,11 +20,14 @@ TEXT, CMD, ARG = range(3)
 
 SUBMENU=[]
 
-def m_back(arg):
+
+def m_back(_arg):
     return BACK
 
-def m_exit(arg):
+
+def m_exit(_arg):
     return EXIT
+
 
 class Menu:
     """
@@ -46,7 +49,7 @@ class Menu:
         bg (int): The background color.
         update_callback (function): A function to call to update the menu in real time.
     """
-    
+
     def __init__(self, fg_color=gc9a01.color565(45, 217, 80), bg_color=gc9a01.color565(0, 0, 0),cursor_fg=gc9a01.color565(120,247,180),
                  cursor_bg=None,clear_after=False, joy_controller=None, scan_rate=0):
         """
@@ -59,24 +62,24 @@ class Menu:
             joycontroller (Joystick): The joystick controller. Default is None.
             scanrate (int): The scan rate. Default is 0.
         """
-        
+
         if joy_controller != None:
             self.joy=joy_controller
             self._extjoy=True
         else:
             self.joy=None
             self._extjoy=False
-        
+
         if scan_rate!=0:
-            joystick.Joystick.run(scan_rate)     
-            
-        self.cursor=0         
-        self.dispmenu=0       
-        self.current=[]       
-        self.level=0          
-        self.stack=[]         
-        self.clear_after=clear_after   
-        self.fg=fg_color            
+            joystick.Joystick.run(scan_rate)
+
+        self.cursor=0
+        self.dispmenu=0
+        self.current=[]
+        self.level=0
+        self.stack=[]
+        self.clear_after=clear_after
+        self.fg=fg_color
         self.bg=bg_color
         if cursor_fg==None:
             self.cfg=self.bg
@@ -92,7 +95,7 @@ class Menu:
 
     def __enter__(self):
         return self
-    
+
     def __exit__(self,exc_type,exc_val,exc_tb):
         if self.joy!=None:
             self.joy.detach()
@@ -100,20 +103,20 @@ class Menu:
     def detach(self):
         """
         Method to detach the joystick from the menu.
-        
+
          Returns:
             Task: The created task.
          """
-        
+
         self.joy.detach()
-        
+
     def set_font(self,font,scale=1.0):
         """
         Method to set a font and scale factor.
         Default: use default font (set to None)
         "*": use default vector font (romans)
         Or you can load a vector font and pass it
-        
+
         Args:
             font (font or string or None): See above
             scale (float): Text scale (defaults to 1.0)
@@ -123,20 +126,20 @@ class Menu:
         else:
             self.font=font
         self.scale=scale
-        
+
     async def menu_custom(self):
         """
         Method you can override to customize the menu in real time
         Or, if you don't want to subclass, you can use set_callback
         and the default will call that
         """
-        
+
         if self.update_callback!=None:
             try:
                 await self.update_callback(self)
             except TypeError:
                 pass
-                
+
 
     def set_callback(self,func):
          """
@@ -145,9 +148,9 @@ class Menu:
          Args:
              func (function): The function to set as the callback.
          """
-         
+
          self.update_callback=func
-         
+
 
     async def menu_update(self):
          """
@@ -155,18 +158,18 @@ class Menu:
 
          This method updates the menu based on the current state of the cursor and calls the custom update function if it is set.
          """
-         
+
          screen.clear(self.bg)
          await self.menu_custom()
-         
-         for i in range(0,min(4,len(self.current))):
-             if i==self.cursor:
+
+         for i in range(0, min(4, len(self.current))):
+             if i == self.cursor:
                  xfg=self.cfg
                  xbg=self.cbg
              else:
                  xfg=self.fg
                  xbg=self.bg
-             
+
              text = self.current[self.dispmenu + i][TEXT]
 
              if callable(text):
@@ -189,13 +192,13 @@ class Menu:
         """
         Method to handle joystick events.
 
-        This method updates the menu based on the joystick event. It can move the cursor, select a menu item, 
+        This method updates the menu based on the joystick event. It can move the cursor, select a menu item,
         go to a submenu, or exit the menu.
 
         Args:
             key (int): The keycode of the joystick event.
         """
-        rv=0 
+        rv=0
         if self.level<=0:
             return                # no menu
         if key==keyleds.JOY_UP:
@@ -205,22 +208,22 @@ class Menu:
                 if self.dispmenu>0:
                     self.dispmenu=self.dispmenu-1
             await self.menu_update()
-            
+
         if key==keyleds.JOY_DN:
             if self.cursor<min(3,len(self.current)-1):
                 self.cursor=self.cursor+1
             else:
-                if self.dispmenu<len(self.current)-4:  
+                if self.dispmenu<len(self.current)-4:
                     self.dispmenu=self.dispmenu+1
             await self.menu_update()
-            
+
         if key==keyleds.JOY_PRESS or key==keyleds.JOY_RT:
-            
-            cmd=self.current[self.cursor+self.dispmenu][1]
-            arg=self.current[self.cursor+self.dispmenu][2]
-            if cmd==None:   # replace with ret val from built-in callback
+
+            _text, cmd, arg = self.current[self.cursor + self.dispmenu]
+
+            if cmd == None:   # replace with ret val from built-in callback
                 rv=-1
-            elif cmd==[]:
+            elif cmd == []:
                 self.stack.append(self.current)
                 self.current=arg
                 self.cursor=0
@@ -238,7 +241,7 @@ class Menu:
 
         if key==keyleds.JOY_LT or rv==-1:
             self.level=self.level-1
-            
+
             if self.stack==[]:
                 self.level=-1
                 self.current=None
@@ -253,7 +256,7 @@ class Menu:
 # with a sublist for each entry. The sublists have three items:
 # A text string, a function, and an argument
 # Pro tip: pass a single list, tuple, etc as an argument and you can pass as much as you want
-    async def do_menu(self,menulist):
+    async def do_menu(self, menulist):
         """
         Method to start the menu.
 
@@ -262,32 +265,31 @@ class Menu:
         Args:
             menulist (list): The list of menu items. Each item is a sublist with three items: a text string, a function, and an argument.
         """
-        
+
         if self._extjoy==False:
             self.joy=joystick.Joystick(self._menu_control,True)
-        
+
         self.current=menulist
         self.stack=[]
         self.dispmenu=0
         self.cursor=0
         self.level=1
-        
+
         screen.clear()
         await self.menu_update()
-        
+
         while self.level>=0:
             await asyncio.sleep(0)
-        
+
         if self.clear_after:
             screen.clear()
-        
+
         if (self._extjoy):
             self.joy.detach()
 
-            
+
 # launch a tag (global, use in menus)
 def launch(tag):
     vos_state.show_menu=False     # get the menu of the way
     vectoros.launch_task(tag)
     return EXIT
-        
