@@ -23,7 +23,8 @@ soft_uart = None
 # Joystick
 # Up is delay up, Down is delay down
 # Right is next, and Left toggles the pause flag
-def joycb(key):
+def rob_joycb(key):
+    print("rob_joycb")
     if (key==keyleds.JOY_UP):
         print("UP")
         soft_uart("UP")
@@ -44,17 +45,17 @@ def menu(key):						# menu -bail out
 
 
 async def vos_main():
-    global exit_flag, current_slide, tid, timer_rate
+    global exit_flag, current_slide, tid, timer_rate, soft_uart
     screen.jpg("robot.jpg")
     soft_uart = create_soft_uart(Pin(28))
     
     # we treat the joystick like any other key here
     keys=keyboardcb.KeyboardCB({
         keyleds.KEY_MENU: menu,
-        keyleds.JOY_UP: joycb,
-        keyleds.JOY_DN: joycb,
-        keyleds.JOY_RT: joycb,
-        keyleds.JOY_LF: joycb
+        keyleds.JOY_UP: rob_joycb,
+        keyleds.JOY_DN: rob_joycb,
+        keyleds.JOY_RT: rob_joycb,
+        keyleds.JOY_LF: rob_joycb
     })
 
     # do nothing... everything is on keyboard and timer
@@ -70,12 +71,9 @@ def main():
     asyncio.run(vos_main());
 
 # if __name__=="__main__":
-#     main()
-#     
+#      main()
 
-# 
+
 if __name__=="__main__":
     import vectoros
     vectoros.run()
-
-

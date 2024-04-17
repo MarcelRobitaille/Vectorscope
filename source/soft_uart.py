@@ -6,8 +6,6 @@ from machine import Pin
 from rp2 import PIO, StateMachine, asm_pio
 
 UART_BAUD = 115200
-PIN_BASE = 26
-NUM_UARTS = 1
 
 
 @asm_pio(sideset_init=PIO.OUT_HIGH, out_init=PIO.OUT_HIGH, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -34,6 +32,6 @@ def create_soft_uart(pin: Pin):
     
     # We can print characters from each UART by pushing them to the TX FIFO
     def pio_uart_print(s):
-        for c in s:
-            sm.put(ord(c))
+        for b in s.encode("utf-8"):
+            sm.put(b)
     return pio_uart_print
