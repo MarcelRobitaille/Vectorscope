@@ -48,6 +48,12 @@ def run_lissajous(_arg):
     return EXIT
 
 
+def run_life(arg):
+    vos_state.show_menu = False
+    vectoros.launch_task("life", arg)
+    return EXIT
+
+
 def run_robot(_arg):
     vos_state.show_menu=False
     vectoros.launch_task('run_robot')
@@ -104,15 +110,23 @@ async def vos_main():
             cursor_fg=colors.PHOSPHOR_BRIGHT,
         ) as amenu:
             ## name in menu, command to run, return value?
-            submenu = [
+            demo_submenu = [
                 ["  Planets", planets, 0],
                 ["  Sketch", runsketch, 0],
                 ["  Back", m_exit, None],
             ]
+            life_submenu = [
+                ["  Pulsar", run_life, "pulsar"],
+                ["  Beacon", run_life, "beacon"],
+                ["  Glider", run_life, "glider"],
+                ["  GosperGliderGun", run_life, "gosper_glider_gun"],
+                ["  Back", m_exit, None],
+            ]
             mainmenu = [
                 [" Lissajous", run_lissajous, None],
-                [" Demos", SUBMENU, submenu],
+                [" Demos", SUBMENU, demo_submenu],
                 [" Run Robot", run_robot, None],
+                [" Life", SUBMENU, life_submenu],
                 [dynamic_sound_text, toggle_sound, None],
                 [" Reboot", reboot, False],
             ]
