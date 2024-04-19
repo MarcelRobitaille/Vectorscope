@@ -48,8 +48,8 @@ class KeyboardCB(keyboardio.KeyboardIO):
     async def _do_callback(self,cb,k):
         try:
            await cb(k)   # async if possible 
-        except TypeError:  # well, it was really a sync call, np...
-            pass
+        except TypeError as e:  # well, it was really a sync call, np...
+            print("Typerror in keyboardcb _do_callback", e)
         
     async def key(self, b):
         """

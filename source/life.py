@@ -1,10 +1,18 @@
+import asyncio
 from time import sleep
+from typing import List
 
 import gc
-import screennorm
 import gc9a01
 
-Grid = list[list[bool]]
+import joystick
+import screennorm
+import keyboardcb
+import vectoros
+import keyleds
+from vos_state import vos_state
+
+Grid = List[List[bool]]
 
 ROWS = 40
 COLS = 40
@@ -163,12 +171,25 @@ def parse_grid(s: str, grid: Grid, offset = None):
 
 
 def initialize(grid: Grid):
+    del grid[:]
     for _ in range(COLS):
         grid.append([False] * ROWS)
 
 
-def vos_main(pattern):
+async def vos_main(pattern):
     screen = screennorm.ScreenNorm()
+
+    if keyboardcb.KeyboardCB.task == None:
+        keyboardcb.KeyboardCB.run(100)  # start keyboard service
+
+    stop_flag = False
+
+    def end_life(_key):
+        nonlocal stop_flag
+        stop_flag = True
+        keyboard.detach()
+
+    keyboard = keyboardcb.KeyboardCB({ keyleds.KEY_MENU: end_life })
 
     gc.collect()
     initialize(grid1)
@@ -180,8 +201,17 @@ def vos_main(pattern):
         "gosper_glider_gun": GOSPER_GLIDER_GUN,
     }[pattern], grid1)
 
-    while True:
+    while not stop_flag:
+        print("showing")
         show_tft(grid1, screen)
+        print("updating")
         update(grid2, grid1)
+        print("done")
+        await asyncio.sleep(0)
         show_tft(grid2, screen)
         update(grid1, grid2)
+        await asyncio.sleep(0)
+
+    stop_flag = False
+    vos_state.show_menu = True
+    vectoros.remove_task("life")

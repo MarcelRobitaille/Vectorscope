@@ -94,8 +94,7 @@ async def vos_main():
     machine.Pin(22, machine.Pin.OUT).toggle()
 
     screen=vectoros.get_screen()
-    splashes = ["splash_europe.jpg", "splash_2024.jpg", "splash_wrencher.jpg"]
-    screen.jpg(random.choice(splashes))
+    screen.jpg("splash_wrencher.jpg")
     await asyncio.sleep_ms(1000)
 
     while True: # since this is the main menu, we don't really every quit
@@ -119,7 +118,7 @@ async def vos_main():
                 ["  Pulsar", run_life, "pulsar"],
                 ["  Beacon", run_life, "beacon"],
                 ["  Glider", run_life, "glider"],
-                ["  GosperGliderGun", run_life, "gosper_glider_gun"],
+                ["  Gun", run_life, "gosper_glider_gun"],
                 ["  Back", m_exit, None],
             ]
             mainmenu = [
@@ -135,7 +134,8 @@ async def vos_main():
             amenu.set_font("*")   # set default vector font
             await amenu.do_menu(mainmenu)
 
-        vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO, f"Menu waiting {vos_state.show_menu}")
+        vos_debug.debug_print(vos_debug.DEBUG_LEVEL_INFO,
+                              f"Menu waiting {vos_state.show_menu}")
 
         while vos_state.show_menu == False:   # wait until we have to be seen again
             await asyncio.sleep_ms(0)
